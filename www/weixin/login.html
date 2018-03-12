@@ -50,6 +50,9 @@
                 var mac = getQueryString('mac').toLowerCase();
                 var ssid = getQueryString('ssid');
 
+                if (!ssid || ssid == '')
+                    ssid = 'null';
+
                 var sign = md5(appId + extend + timestamp + shopId + authUrl + mac + ssid + secretkey);
                 Wechat_GotoRedirect(appId, extend, timestamp, sign, shopId, authUrl, mac, ssid);
             });
