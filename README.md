@@ -1,25 +1,14 @@
-# wifidog-ng-authserver
+# wifidog-ng-authserver([中文](/README_ZH.md))
 A simple auth server for wifidog-ng to test
 
 # Deploying the server
-Install the GO language environment (if you haven't installed it)
+# Download
 
-    sudo apt-get install golang     # For Ubuntu
+    curl https://raw.githubusercontent.com/zhaojh329/wifidog-ng-authserver/master/install.sh | sh
 
-    sudo yum install golang         # For Centos
+# run
 
-Set GOPATH environment variable(if you haven't set it)(since Go 1.8, default is $HOME/go)
-
-    export GOPATH=$HOME/go
-
-Install wifidog-ng-authserver
-
-    go get -u github.com/zhaojh329/wifidog-ng-authserver
-
-Run
-
-	$GOPATH/bin/wifidog-ng-authserver
-	$GOPATH/bin/wifidog-ng-authserver -wx	# For WeChat
+    ./wifidog-ng-authserver
 
 # Configure your wifidog-ng in your router
 
