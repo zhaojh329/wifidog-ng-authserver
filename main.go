@@ -31,6 +31,8 @@ import (
     "encoding/hex"
     "io/ioutil"
     "encoding/json"
+    _ "github.com/zhaojh329/wifidog-ng-authserver/statik"
+    "github.com/rakyll/statik/fs"
     "github.com/joshbetz/config"
 )
 
@@ -103,10 +105,18 @@ func main() {
         fmt.Fprintf(w, "Pong")
     })
 
+    statikFS, err := fs.New()
+    if err != nil {
+        log.Fatal(err)
+        return
+    }
+
+    staticfs := http.FileServer(statikFS)
+
     http.HandleFunc("/wifidog/login", func(w http.ResponseWriter, r *http.Request) {
         if r.Method == "GET" {
             if *weixin {
-                http.ServeFile(w, r, "www/weixin/login.html")
+                http.Redirect(w, r, "/weixin/login.html?" + r.URL.RawQuery, http.StatusFound)
             } else {
                 fmt.Fprintf(w, loginPage)
             }
@@ -160,7 +170,9 @@ func main() {
         fmt.Fprintf(w, string(js))
     })
 
-    http.Handle("/", http.FileServer(http.Dir("./www")))
+    http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+        staticfs.ServeHTTP(w, r)
+    })
 
     log.Println("Listen on: ", *port)
     log.Println("weixin: ", *weixin)
