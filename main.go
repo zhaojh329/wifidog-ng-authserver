@@ -29,7 +29,6 @@ import (
     "net/http"
     "crypto/md5"
     "encoding/hex"
-    "strings"
     "io/ioutil"
     "encoding/json"
     "github.com/joshbetz/config"
@@ -78,12 +77,6 @@ func generateToken(mac string) string {
     return hex.EncodeToString(cipherStr)
 }
 
-type client struct {
-    token string
-    ip string
-    url string
-}
-
 type weixinConfig struct {
     Appid string `json:"appid"`
     Shopid string `json:"shopid"`
@@ -97,8 +90,6 @@ func main() {
     flag.Parse()
 
     rand.Seed(time.Now().Unix())
-
-    clients := make(map[string]client)
 
     c := config.New("weixin.json")
     weixincfg := &weixinConfig{}
@@ -124,12 +115,9 @@ func main() {
             gw_port := r.URL.Query().Get("gw_port")
             ip := r.URL.Query().Get("ip")
             mac := r.URL.Query().Get("mac")
-            url := r.URL.Query().Get("url")
             token := generateToken(mac)
-
-            clients[mac] = client{token, ip, url}
         
-            log.Println("New client:", mac, token)
+            log.Println("New client:", mac, ip, token)
 
             uri := fmt.Sprintf("http://%s:%s/wifidog/auth?token=%s", gw_address, gw_port, token)
             http.Redirect(w, r, uri, http.StatusFound)
@@ -138,10 +126,6 @@ func main() {
 
     http.HandleFunc("/wifidog/auth", func(w http.ResponseWriter, r *http.Request) {
         stage := r.URL.Query().Get("stage")
-        mac := strings.ToUpper(r.URL.Query().Get("mac"))
-        token := r.URL.Query().Get("token")
-
-        auth := 0
 
         if stage == "counters" {
             body, _ := ioutil.ReadAll(r.Body)
@@ -151,22 +135,7 @@ func main() {
             return;
         }
 
-        if client, ok := clients[mac]; ok {
-            if client.token == token {
-                if stage == "login" {
-                    auth = 1
-                } else if stage == "logout" {
-                    log.Println("logout:", mac)
-                    delete(clients, mac)
-                }
-            } else {
-                log.Printf("Invalid token(%s) for %s\n", token, mac)
-            }
-        } else {
-            log.Println("Not found ", mac)
-        }
-
-        fmt.Fprintf(w, "Auth: %d", auth)
+        fmt.Fprintf(w, "Auth: 1")
     })
 
     http.HandleFunc("/wifidog/weixin", func(w http.ResponseWriter, r *http.Request) {
@@ -176,9 +145,7 @@ func main() {
         ip := r.URL.Query().Get("ip")
         token := generateToken(mac)
 
-        clients[mac] = client{token, ip, ""}
-
-        log.Println("New Weixin client:", mac, token)
+        log.Println("New Weixin client:", mac, ip, token)
 
         uri := fmt.Sprintf("http://%s:%s/wifidog/auth?token=%s", gw_address, gw_port, token)
         http.Redirect(w, r, uri, http.StatusFound)
