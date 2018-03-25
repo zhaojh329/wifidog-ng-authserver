@@ -114,6 +114,7 @@ func main() {
     staticfs := http.FileServer(statikFS)
 
     http.HandleFunc("/wifidog/login", func(w http.ResponseWriter, r *http.Request) {
+        log.Println("login", r.URL.RawQuery)
         if r.Method == "GET" {
             if *weixin {
                 http.Redirect(w, r, "/weixin/login.html?" + r.URL.RawQuery, http.StatusFound)
@@ -123,11 +124,8 @@ func main() {
         } else {
             gw_address := r.URL.Query().Get("gw_address")
             gw_port := r.URL.Query().Get("gw_port")
-            ip := r.URL.Query().Get("ip")
             mac := r.URL.Query().Get("mac")
             token := generateToken(mac)
-        
-            log.Println("New client:", mac, ip, token)
 
             uri := fmt.Sprintf("http://%s:%s/wifidog/auth?token=%s", gw_address, gw_port, token)
             http.Redirect(w, r, uri, http.StatusFound)
@@ -137,31 +135,34 @@ func main() {
     http.HandleFunc("/wifidog/auth", func(w http.ResponseWriter, r *http.Request) {
         stage := r.URL.Query().Get("stage")
 
-        if stage == "counters" {
+        log.Println("auth", stage, r.URL.RawQuery)
+
+        if stage == "login" {
+            fmt.Fprintf(w, "Auth: 1")
+        } else if stage == "counters" {
             body, _ := ioutil.ReadAll(r.Body)
             r.Body.Close()
-            log.Println("counters:", string(body))
+            log.Println(string(body))
             fmt.Fprintf(w, "{\"resp\":[]}")
             return;
+        } else {
+            fmt.Fprintf(w, "OK")
         }
-
-        fmt.Fprintf(w, "Auth: 1")
     })
 
     http.HandleFunc("/wifidog/weixin", func(w http.ResponseWriter, r *http.Request) {
+        log.Println("weixin", r.URL.RawQuery)
         gw_address := r.URL.Query().Get("gw_address")
         gw_port := r.URL.Query().Get("gw_port")
         mac := r.URL.Query().Get("mac")
-        ip := r.URL.Query().Get("ip")
         token := generateToken(mac)
-
-        log.Println("New Weixin client:", mac, ip, token)
 
         uri := fmt.Sprintf("http://%s:%s/wifidog/auth?token=%s", gw_address, gw_port, token)
         http.Redirect(w, r, uri, http.StatusFound)
     })
 
     http.HandleFunc("/wifidog/portal", func(w http.ResponseWriter, r *http.Request) {
+        log.Println("portal", r.URL.RawQuery)
         fmt.Fprintf(w, portalPage)
     })
 
