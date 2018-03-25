@@ -88,6 +88,7 @@ type weixinConfig struct {
 func main() {
     port := flag.Int("port", 8912, "http service port")
     weixin := flag.Bool("wx", false, "weixin")
+    roam := flag.Bool("roam", false, "roam")
     verbose := flag.Bool("v", false, "verbose")
 
     flag.Parse()
@@ -152,7 +153,11 @@ func main() {
             fmt.Fprintf(w, "{\"resp\":[]}")
         } else if stage == "roam" {
             log.Println("auth", stage, r.URL.RawQuery)
-            fmt.Fprintf(w, "Auth: 1")
+            if *roam {
+                fmt.Fprintf(w, "Auth: 1")
+            } else {
+                fmt.Fprintf(w, "Auth: 0")
+            }
         } else {
             log.Println("auth", stage, r.URL.RawQuery)
             fmt.Fprintf(w, "OK")
