@@ -88,6 +88,7 @@ type weixinConfig struct {
 func main() {
     port := flag.Int("port", 8912, "http service port")
     weixin := flag.Bool("wx", false, "weixin")
+    verbose := flag.Bool("v", false, "verbose")
 
     flag.Parse()
 
@@ -101,7 +102,10 @@ func main() {
     c.Get("secretkey", &weixincfg.Secretkey)
 
     http.HandleFunc("/wifidog/ping", func(w http.ResponseWriter, r *http.Request) {
-        log.Println("ping", r.URL.RawQuery)
+        if *verbose {
+            log.Println("ping", r.URL.RawQuery)    
+        }
+        
         fmt.Fprintf(w, "Pong")
     })
 
@@ -135,17 +139,22 @@ func main() {
     http.HandleFunc("/wifidog/auth", func(w http.ResponseWriter, r *http.Request) {
         stage := r.URL.Query().Get("stage")
 
-        log.Println("auth", stage, r.URL.RawQuery)
-
         if stage == "login" {
+            log.Println("auth", stage, r.URL.RawQuery)
             fmt.Fprintf(w, "Auth: 1")
         } else if stage == "counters" {
-            body, _ := ioutil.ReadAll(r.Body)
-            r.Body.Close()
-            log.Println(string(body))
+            if *verbose {
+                body, _ := ioutil.ReadAll(r.Body)
+                r.Body.Close()
+                log.Println("auth", stage, r.URL.RawQuery)
+                log.Println(string(body))
+            }
             fmt.Fprintf(w, "{\"resp\":[]}")
-            return;
+        } else if stage == "roam" {
+            log.Println("auth", stage, r.URL.RawQuery)
+            fmt.Fprintf(w, "Auth: 1")
         } else {
+            log.Println("auth", stage, r.URL.RawQuery)
             fmt.Fprintf(w, "OK")
         }
     })
