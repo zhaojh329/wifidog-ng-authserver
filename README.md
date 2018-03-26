@@ -2,14 +2,18 @@
 A simple auth server for wifidog-ng to test
 
 # Deploying the server
-# Download
+## Download the compiled file according to your own platform
 
-    curl https://raw.githubusercontent.com/zhaojh329/wifidog-ng-authserver/master/install.sh | sh
+https://github.com/zhaojh329/wifidog-ng-authserver/releases
 
-# run
+## Then decompress the file
+
+    tar zxvf wifidog-ng-authserver-x64.tar.gz
+
+## run
 
     ./wifidog-ng-authserver
 
-# Configure your wifidog-ng in your router
+## Configure your wifidog-ng in your router
 
 	vi /etc/config/wifidog-ng
