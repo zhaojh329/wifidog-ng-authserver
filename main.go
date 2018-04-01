@@ -90,6 +90,8 @@ func main() {
     weixin := flag.Bool("wx", false, "weixin")
     roam := flag.Bool("roam", false, "roam")
     verbose := flag.Bool("v", false, "verbose")
+    cert := flag.String("cert", "", "certFile Path")
+    key := flag.String("key", "", "keyFile Path")
 
     flag.Parse()
 
@@ -191,6 +193,13 @@ func main() {
 
     log.Println("Listen on: ", *port)
     log.Println("weixin: ", *weixin)
+    log.Println("roam: ", *roam)
 
-    log.Fatal(http.ListenAndServe(":" + strconv.Itoa(*port), nil))
+    if *cert != "" && *key != "" {
+        log.Println("Listen on: ", *port, "SSL on")
+        log.Fatal(http.ListenAndServeTLS(":" + strconv.Itoa(*port), *cert, *key, nil))
+    } else {
+        log.Println("Listen on: ", *port, "SSL off")
+        log.Fatal(http.ListenAndServe(":" + strconv.Itoa(*port), nil))
+    }
 }
