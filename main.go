@@ -156,9 +156,9 @@ func main() {
         } else if stage == "roam" {
             log.Println("auth", stage, r.URL.RawQuery)
             if *roam {
-                fmt.Fprintf(w, "Auth: 1")
+                fmt.Fprintf(w, "token=12345678")
             } else {
-                fmt.Fprintf(w, "Auth: 0")
+                fmt.Fprintf(w, "deny")
             }
         } else {
             log.Println("auth", stage, r.URL.RawQuery)
